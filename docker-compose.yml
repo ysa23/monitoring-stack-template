@@ -1,0 +1,42 @@
+version: '3'
+services: 
+  digitalocean-exporter:
+    image: metalmatze/digitalocean_exporter:0.5
+    environment:
+    - DIGITALOCEAN_TOKEN=PROVIDE_DIGITAL_OCEAN_API_TOKEN_HERE
+    restart: always
+    ports:
+    - "9212:9212"
+
+  nginx:
+    image: nginx:1.15.8
+    restart: always
+    volumes: 
+    - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+    - ./index.html:/data/www/index.html:ro
+    ports:
+    - "8080:8080"
+    
+  nginx-exporter:
+    image: nginx/nginx-prometheus-exporter:0.7.0
+    environment: 
+    - SCRAPE_URI=http://nginx:8080/status
+    ports:
+    - "9113:9113"
+
+  prometheus: # To enable auth on the admin UI: https://prometheus.io/docs/guides/basic-auth/
+    image: prom/prometheus:v2.17.2
+    restart: always
+    volumes: 
+    - ./prom.yml:/etc/prometheus/prometheus.yml
+    ports:
+    - "9090:9090"
+  grafana:
+    image: grafana/grafana:6.7.3
+    restart: always
+    ports:
+    - "3000:3000"
+    volumes: 
+    - ./grafana-datasource.yml:/etc/grafana/provisioning/datasources/datasource-prometheus.yml
+    - ./grafana-dashboard-provider.yml:/etc/grafana/provisioning/dashboards/dashboard-provider.yml
+    - ./grafana-blog-dashboard.json:/var/lib/grafana/dashboards/blog-dashboard.json

@@ -1,0 +1,27 @@
+global:
+  scrape_interval: 15s
+  scrape_timeout: 10s
+  evaluation_interval: 15s
+alerting:
+  alertmanagers:
+  - static_configs:
+    - targets: []
+    scheme: http
+    timeout: 10s
+    api_version: v1
+scrape_configs:
+- job_name: digitalocean
+  metrics_path: /metrics
+  static_configs:
+    - targets:
+      - 'digitalocean-exporter:9212'
+- job_name: nginx
+  metrics_path: /metrics
+  static_configs:
+    - targets:
+      - 'nginx-exporter:9113'
+- job_name: docker
+  metrics_path: /metrics
+  static_configs:
+    - targets:
+      - 'host.docker.internal:50501' # Only on docker for windows/mac. In prod requires the actual IP of the host. Need to check 172.17.0.1 - which is the linux default
